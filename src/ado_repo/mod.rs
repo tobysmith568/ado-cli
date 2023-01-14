@@ -6,19 +6,21 @@ use crate::utils::{
 };
 
 use self::{
-    ado::{
-        pr::get_pr_id,
-        repository_id::{
-            get_repository_id_from_api, get_repository_id_from_disk, save_repository_id_to_disk,
-        },
+    ado::repository_id::{
+        get_repository_id_from_api, get_repository_id_from_disk, save_repository_id_to_disk,
     },
+    ado_pr::AdoPr,
     git::get_current_branch::get_current_branch,
     parse_from_remote_url::{parse_from_http_remote_url, parse_from_ssh_remote_url},
+    pr_id::get_pr_id,
 };
 
 mod ado;
+mod ado_pr;
+mod ado_work_item;
 mod git;
 mod parse_from_remote_url;
+mod pr_id;
 
 #[derive(Debug)]
 pub struct AdoRepo {
@@ -87,18 +89,9 @@ impl AdoRepo {
         )
     }
 
-    pub async fn pr_page_url(&self) -> Option<String> {
+    pub async fn get_pr(&self) -> Option<AdoPr> {
         let pr_id = get_pr_id(&self).await?;
 
-        let AdoRepo {
-            organisation_name,
-            project_name,
-            repository_name,
-            ..
-        } = self;
-
-        Some(format!(
-            "https://dev.azure.com/{organisation_name}/{project_name}/_git/{repository_name}/pullrequest/{pr_id}"
-        ))
+        Some(AdoPr::from(&self, pr_id))
     }
 }

@@ -44,6 +44,6 @@ async fn main() {
     match cli.command {
         Commands::Files(files) => run_files_command(files),
         Commands::Pr(pr) => run_pr_command(pr).await,
-        Commands::Item(item) => run_item_command(item),
+        Commands::Item(item) => run_item_command(item).await,
     }
 }

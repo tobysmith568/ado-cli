@@ -18,7 +18,8 @@ pub async fn run_pr_command(options: Pr) {
 
     let repo = AdoRepo::from_directory(&working_dir);
 
-    let pr_page_url = repo.pr_page_url().await.unwrap();
+    let pr = repo.get_pr().await.unwrap();
+    let pr_url = pr.pr_page_url().await.unwrap();
 
-    open_url(&pr_page_url);
+    open_url(&pr_url);
 }
