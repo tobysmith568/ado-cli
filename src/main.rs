@@ -1,34 +1,42 @@
-use std::{env, ops::Index, path::Path};
+use clap::{Parser, Subcommand};
 
-use crate::{
-    ado_repo::AdoRepo,
-    git_utils::{get_current_branch, get_remote_url},
+use subcommands::{
+    files::{run_files_command, Files},
+    item::{run_item_command, Item},
+    pr::{run_pr_command, Pr},
 };
 
-mod ado_repo;
-mod browser_utils;
-mod git_utils;
+mod subcommands;
+mod utils;
 
 #[macro_use]
 extern crate ini;
 
+#[derive(clap::Parser, Debug)]
+#[clap(
+    author = "Toby Smith",
+    version = "1.0.0",
+    about = "Open Azure Devops board items, PRs, and repositories"
+)]
+#[command(propagate_version = true)]
+struct Cli {
+    #[command(subcommand)]
+    command: Commands,
+}
+
+#[derive(Subcommand, Debug)]
+enum Commands {
+    Item(Item),
+    Pr(Pr),
+    Files(Files),
+}
+
 fn main() {
-    let cwd = env::current_dir().expect("Cannot access the current directory");
+    let cli = Cli::parse();
 
-    let git_dir = git_utils::find_git_directory(&cwd).expect("Not in a git repository");
-    let config_file_path = git_dir.join("config");
-    let remote_url =
-        get_remote_url(&config_file_path).expect("Could not find remote url in git config");
-
-    dbg!(&remote_url);
-
-    let git_branch = get_current_branch(&git_dir);
-
-    dbg!(&git_branch);
-
-    let repo = AdoRepo::from_remote_url_and_branch(&remote_url, &git_branch);
-
-    dbg!(&repo);
-
-    // repo.open_files_page();
+    match cli.command {
+        Commands::Item(item) => run_item_command(item),
+        Commands::Pr(pr) => run_pr_command(pr),
+        Commands::Files(files) => run_files_command(files),
+    }
 }
