@@ -2,6 +2,8 @@ use std::{env, path::PathBuf};
 
 use clap::Args;
 
+use crate::{ado_repo::AdoRepo, utils::browser::open_url};
+
 #[derive(Args, Debug)]
 pub struct Pr {
     /// The current working directory
@@ -9,10 +11,14 @@ pub struct Pr {
     directory: Option<PathBuf>,
 }
 
-pub fn run_pr_command(options: Pr) {
+pub async fn run_pr_command(options: Pr) {
     let working_dir = options
         .directory
         .unwrap_or_else(|| env::current_dir().expect("Cannot access the current directory"));
 
-    dbg!(working_dir);
+    let repo = AdoRepo::from_directory(&working_dir);
+
+    let pr_page_url = repo.pr_page_url().await.unwrap();
+
+    open_url(&pr_page_url);
 }
