@@ -6,6 +6,7 @@ use subcommands::{
     pr::{run_pr_command, Pr},
 };
 
+mod ado_repo;
 mod subcommands;
 mod utils;
 
