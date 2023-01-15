@@ -2,7 +2,13 @@ use std::{env, path::PathBuf};
 
 use clap::Args;
 
-use crate::{ado_repo::AdoRepo, utils::browser::open_url};
+use crate::{
+    ado::organisation::{
+        organisation::Organisation,
+        project::repository::parse_remote_url::{parse_remote_url, ParsedRemoteUrl},
+    },
+    utils::git::{find_git_directory, get_remote_url},
+};
 
 #[derive(Args, Debug)]
 pub struct Pr {
@@ -16,10 +22,28 @@ pub async fn run_pr_command(options: Pr) {
         .directory
         .unwrap_or_else(|| env::current_dir().expect("Cannot access the current directory"));
 
-    let repo = AdoRepo::from_directory(&working_dir);
+    let git_directory = find_git_directory(&working_dir);
+    let config_file_path = git_directory.join("config");
+    let remote_url = get_remote_url(&config_file_path);
+    let ParsedRemoteUrl {
+        organisation_name,
+        project_name,
+        repository_name,
+        ..
+    } = parse_remote_url(&remote_url);
 
-    let pr = repo.get_pr().await.unwrap();
-    let pr_url = pr.pr_page_url().await.unwrap();
+    let organisation = Organisation::new(&organisation_name);
+    let project = organisation.get_project(&project_name);
+    let repository = project.get_repository(&repository_name, &working_dir);
+    let pr = repository.get_pull_request_for_current_branch().await;
 
-    open_url(&pr_url);
+    if let None = pr {
+        println!("There is no PR for the currently checked out branch");
+        return ();
+    }
+
+    let pr = pr.unwrap();
+    let pr_url = pr.get_url();
+
+    pr_url.open_in_browser();
 }

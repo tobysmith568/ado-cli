@@ -1,10 +1,10 @@
 use std::process::Command;
 
-use crate::ado_repo::AdoRepo;
+use super::repository::Repository;
 
-pub fn get_current_branch(ado_repo: &AdoRepo) -> String {
+pub fn get_current_branch(repository: &Repository) -> String {
     let command_result = Command::new("git")
-        .current_dir(&ado_repo.directory)
+        .current_dir(&repository.local_location)
         .arg("branch")
         .arg("--show-current")
         .output()

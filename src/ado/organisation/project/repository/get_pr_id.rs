@@ -1,18 +1,17 @@
 use azure_devops_rust_api::git;
 
-use crate::ado_repo::{ado::api_key::get_api_key, AdoRepo};
+use crate::ado::api_key::get_api_key;
 
-pub async fn get_pr_id(ado_repo: &AdoRepo) -> Option<i32> {
-    let repo_id = ado_repo.get_repository_id().await;
-    let source_branch = ado_repo.current_branch();
+use super::{get_repository_id::get_repository_id, repository::Repository};
+
+pub async fn get_pr_id<'a>(repository: &Repository<'a>) -> Option<i32> {
+    let repo_id = get_repository_id(repository).await;
+    let source_branch = repository.get_current_branch();
 
     let api_key = get_api_key();
 
-    let AdoRepo {
-        organisation_name,
-        project_name,
-        ..
-    } = &ado_repo;
+    let organisation_name = &repository.project.organisation.name;
+    let project_name = &repository.project.name;
 
     let git_client = git::ClientBuilder::new(api_key).build();
 
