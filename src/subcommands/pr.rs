@@ -5,8 +5,12 @@ use clap::Args;
 use crate::{
     ado::organisation::{
         organisation::Organisation,
-        project::repository::parse_remote_url::{parse_remote_url, ParsedRemoteUrl},
+        project::repository::{
+            parse_remote_url::{parse_remote_url, ParsedRemoteUrl},
+            repository::Repository,
+        },
     },
+    cli::prompt_yes_no::{prompt_yes_no, YesNoResult},
     utils::git::{find_git_directory, get_remote_url},
 };
 
@@ -45,12 +49,27 @@ pub async fn run_pr_command(options: Pr) {
     let pr = repository.get_pull_request_for_branch(&branch_name).await;
 
     if let None = pr {
-        println!("There is no PR for the branch {}", &branch_name);
-        return ();
+        return handle_no_pr_exists(&repository, &branch_name);
     }
 
     let pr = pr.unwrap();
     let pr_url = pr.get_url();
 
     pr_url.open_in_browser();
+}
+
+fn handle_no_pr_exists(repository: &Repository, branch_name: &str) {
+    let question = format!(
+        "There is no open PR for branch {}. Would you like to open one?",
+        branch_name
+    );
+
+    let should_create_new = prompt_yes_no(&question);
+
+    if let YesNoResult::No = should_create_new {
+        return ();
+    }
+
+    let url = repository.get_create_pr_url_for_branch(branch_name);
+    url.open_in_browser();
 }

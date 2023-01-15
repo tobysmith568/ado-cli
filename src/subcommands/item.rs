@@ -45,7 +45,10 @@ pub async fn run_item_command(options: Item) {
     let pr = repository.get_pull_request_for_branch(&branch_name).await;
 
     if let None = pr {
-        println!("There is no PR for the branch {}", &branch_name);
+        println!(
+            "There is no open PR for the branch {}; so a linked PBI/Bug/etc. could not be discovered.",
+            &branch_name
+        );
         return ();
     }
 

@@ -7,6 +7,7 @@ use subcommands::{
 };
 
 mod ado;
+mod cli;
 mod subcommands;
 mod utils;
 

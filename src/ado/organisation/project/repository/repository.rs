@@ -48,4 +48,18 @@ impl<'a> Repository<'a> {
 
         Some(PullRequest::new(self, pr_id))
     }
+
+    pub fn get_create_pr_url_for_branch(&self, branch_name: &str) -> Url {
+        let organisation_name = &self.project.organisation.name;
+        let project_name = &self.project.name;
+        let repository_name = &self.name;
+
+        let url_encoded_branch_name = url_encode(&branch_name);
+
+        let url_text = format!(
+            "https://dev.azure.com/{organisation_name}/{project_name}/_git/{repository_name}/pullrequestcreate?sourceRef={url_encoded_branch_name}"
+        );
+
+        Url::from(url_text)
+    }
 }
