@@ -15,11 +15,7 @@ mod utils;
 extern crate ini;
 
 #[derive(clap::Parser, Debug)]
-#[clap(
-    author,
-    version,
-    about = "Open Azure Devops board items, PRs, and repositories"
-)]
+#[clap(author, version, about)]
 #[command(propagate_version = true)]
 struct Cli {
     #[command(subcommand)]
