@@ -53,5 +53,5 @@ async fn get_repository_id_from_api<'a>(repository: &Repository<'a>) -> String {
 }
 
 fn get_repo_id_file_name(repository: &Repository) -> PathBuf {
-    repository.local_location.join("ado_repo_id")
+    repository.local_location.join(".git").join("ado_repo_id")
 }

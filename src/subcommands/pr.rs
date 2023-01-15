@@ -11,7 +11,7 @@ use crate::{
         Organisation,
     },
     cli::prompt_yes_no::{prompt_yes_no, YesNoResult},
-    utils::git::{find_git_directory, get_remote_url},
+    utils::git::{find_git_repository_root, get_remote_url},
 };
 
 #[derive(Args, Debug)]
@@ -34,8 +34,8 @@ pub async fn run_pr_command(options: Pr) {
         .directory
         .unwrap_or_else(|| env::current_dir().expect("Cannot access the current directory"));
 
-    let git_directory = find_git_directory(&working_dir);
-    let config_file_path = git_directory.join("config");
+    let git_repository_root = find_git_repository_root(&working_dir);
+    let config_file_path = git_repository_root.join(".git").join("config");
     let remote_url = get_remote_url(&config_file_path);
     let ParsedRemoteUrl {
         organisation_name,
@@ -46,7 +46,7 @@ pub async fn run_pr_command(options: Pr) {
 
     let organisation = Organisation::new(&organisation_name);
     let project = organisation.get_project(&project_name);
-    let repository = project.get_repository(&repository_name, &working_dir);
+    let repository = project.get_repository(&repository_name, &git_repository_root);
 
     let branch_name = options
         .branch

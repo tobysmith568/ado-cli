@@ -12,12 +12,12 @@ pub fn get_remote_url(config_file_path: &Path) -> String {
     panic!("Cannot find remote url");
 }
 
-pub fn find_git_directory(directory: &Path) -> PathBuf {
+pub fn find_git_repository_root(directory: &Path) -> PathBuf {
     for parent in directory.ancestors() {
         let potential_git_dir = parent.join(".git");
 
         if potential_git_dir.is_dir() {
-            return potential_git_dir;
+            return parent.to_path_buf();
         }
     }
 
