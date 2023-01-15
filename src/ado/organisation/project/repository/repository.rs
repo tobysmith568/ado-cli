@@ -29,18 +29,7 @@ impl<'a> Repository<'a> {
         get_current_branch(self)
     }
 
-    pub fn get_files_url_for_current_branch(&self) -> Url {
-        let current_branch = get_current_branch(self);
-        self.get_files_url_for_branch(&current_branch)
-    }
-
-    pub async fn get_pull_request_for_current_branch(&self) -> Option<PullRequest> {
-        let pr_id = get_pr_id(self).await?;
-
-        Some(PullRequest::new(self, pr_id))
-    }
-
-    fn get_files_url_for_branch(&self, branch_name: &str) -> Url {
+    pub fn get_files_url_for_branch(&self, branch_name: &str) -> Url {
         let project_name = &self.project.name;
         let organisation_name = &self.project.organisation.name;
         let repository_name = &self.name;
@@ -52,5 +41,11 @@ impl<'a> Repository<'a> {
         );
 
         Url::from(url_text)
+    }
+
+    pub async fn get_pull_request_for_branch(&self, branch_name: &str) -> Option<PullRequest> {
+        let pr_id = get_pr_id(self, branch_name).await?;
+
+        Some(PullRequest::new(self, pr_id))
     }
 }

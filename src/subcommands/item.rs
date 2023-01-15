@@ -12,9 +12,13 @@ use crate::{
 
 #[derive(Args, Debug)]
 pub struct Item {
-    /// The current working directory
+    /// The directory to run the command from. Defaults to the current working directory
     #[arg(short, long)]
     directory: Option<PathBuf>,
+
+    /// The branch name to use. Defaults to the currently checked out branch
+    #[arg(short, long)]
+    branch: Option<String>,
 }
 
 pub async fn run_item_command(options: Item) {
@@ -35,10 +39,13 @@ pub async fn run_item_command(options: Item) {
     let organisation = Organisation::new(&organisation_name);
     let project = organisation.get_project(&project_name);
     let repository = project.get_repository(&repository_name, &working_dir);
-    let pr = repository.get_pull_request_for_current_branch().await;
+
+    let branch_name = options.branch.unwrap_or(repository.get_current_branch());
+
+    let pr = repository.get_pull_request_for_branch(&branch_name).await;
 
     if let None = pr {
-        println!("There is no PR for the currently checked out branch");
+        println!("There is no PR for the branch {}", &branch_name);
         return ();
     }
 

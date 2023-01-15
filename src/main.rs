@@ -33,7 +33,7 @@ enum Commands {
     /// Opens a browser tab to the open PR for the current branch, or lets you create one
     Pr(Pr),
 
-    /// Opens a browser tab to a PBI/Bug/Action/Etc. that's associated with the current branch
+    /// Opens a browser tab to the PBI/Bug/Action/Etc. that's associated with the PR for the current branch
     Item(Item),
 }
 

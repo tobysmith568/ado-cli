@@ -12,9 +12,13 @@ use crate::{
 
 #[derive(Args, Debug)]
 pub struct Files {
-    /// The current working directory
+    /// The directory to run the command from. Defaults to the current working directory
     #[arg(short, long)]
     directory: Option<PathBuf>,
+
+    /// The branch name to use. Defaults to the currently checked out branch
+    #[arg(short, long)]
+    branch: Option<String>,
 }
 
 pub fn run_files_command(options: Files) {
@@ -35,6 +39,8 @@ pub fn run_files_command(options: Files) {
     let project = organisation.get_project(&project_name);
     let repository = project.get_repository(&repository_name, &working_dir);
 
-    let files_url = repository.get_files_url_for_current_branch();
+    let branch_name = options.branch.unwrap_or(repository.get_current_branch());
+
+    let files_url = repository.get_files_url_for_branch(&branch_name);
     files_url.open_in_browser();
 }

@@ -4,9 +4,8 @@ use crate::ado::api_key::get_api_key;
 
 use super::{get_repository_id::get_repository_id, repository::Repository};
 
-pub async fn get_pr_id<'a>(repository: &Repository<'a>) -> Option<i32> {
+pub async fn get_pr_id<'a>(repository: &Repository<'a>, branch_name: &str) -> Option<i32> {
     let repo_id = get_repository_id(repository).await;
-    let source_branch = repository.get_current_branch();
 
     let api_key = get_api_key();
 
@@ -22,7 +21,7 @@ pub async fn get_pr_id<'a>(repository: &Repository<'a>) -> Option<i32> {
         .unwrap();
 
     for pr in pull_requests.value.iter() {
-        if pr.source_ref_name.ends_with(&source_branch) {
+        if pr.source_ref_name.ends_with(branch_name) {
             return Some(pr.pull_request_id);
         }
     }
