@@ -1,4 +1,4 @@
-use std::{fs::read_to_string};
+use std::fs::read_to_string;
 
 use azure_devops_rust_api::Credential;
 use dirs::home_dir;

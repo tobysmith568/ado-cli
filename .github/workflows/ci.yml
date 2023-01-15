@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  lint:
+    name: Lint
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Run formatting
+        run: cargo fmt -- --check
+
+      - name: Run Clippy
+        run: cargo clippy -- -Dwarnings
+
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - name: Windows
+            runsOn: windows-latest
+            binary: ./target/release/ado.exe
+
+          - name: Ubuntu
+            runsOn: ubuntu-latest
+            binary: ./target/release/ado
+
+          - name: MacOS
+            runsOn: macos-latest
+            binary: ./target/release/ado
+
+    name: Build on ${{ matrix.os.name }}
+
+    runs-on: ${{ matrix.os.runsOn }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Build
+        run: cargo build --release --verbose
+
+      - name: Upload Build
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.os.name }}-Build
+          path: ${{ matrix.os.binary }}
+          retention-days: 1
+
+  test:
+    name: Test
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Run tests
+        run: cargo test --verbose
