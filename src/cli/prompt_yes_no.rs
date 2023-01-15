@@ -1,17 +1,9 @@
 use dialoguer::{console::Term, theme::ColorfulTheme, Select};
 
+#[derive(Debug)]
 pub enum YesNoResult {
     Yes,
     No,
-}
-
-impl YesNoResult {
-    pub fn to_string(&self) -> String {
-        match self {
-            YesNoResult::Yes => String::from("Yes"),
-            YesNoResult::No => String::from("No"),
-        }
-    }
 }
 
 pub fn prompt_yes_no(question: &str) -> YesNoResult {
@@ -35,6 +27,6 @@ pub fn prompt_yes_no(question: &str) -> YesNoResult {
         None => YesNoResult::No,
     };
 
-    println!("> {}", result.to_string());
+    println!("> {:?}", result);
     result
 }

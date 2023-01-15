@@ -4,8 +4,8 @@ use clap::Args;
 
 use crate::{
     ado::organisation::{
-        organisation::Organisation,
         project::repository::parse_remote_url::{parse_remote_url, ParsedRemoteUrl},
+        Organisation,
     },
     utils::git::{find_git_directory, get_remote_url},
 };
@@ -40,22 +40,24 @@ pub async fn run_item_command(options: Item) {
     let project = organisation.get_project(&project_name);
     let repository = project.get_repository(&repository_name, &working_dir);
 
-    let branch_name = options.branch.unwrap_or(repository.get_current_branch());
+    let branch_name = options
+        .branch
+        .unwrap_or_else(|| repository.get_current_branch());
 
     let pr = repository.get_pull_request_for_branch(&branch_name).await;
 
-    if let None = pr {
+    if pr.is_none() {
         println!(
             "There is no open PR for the branch {}; so a linked PBI/Bug/etc. could not be discovered.",
             &branch_name
         );
-        return ();
+        return;
     }
 
     let pr = pr.unwrap();
     let work_items = pr.get_linked_work_items().await;
 
-    if work_items.len() > 0 {
+    if !work_items.is_empty() {
         let work_item_url = work_items[0].get_url();
         work_item_url.open_in_browser();
     }

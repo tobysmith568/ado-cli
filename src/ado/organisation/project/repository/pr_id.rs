@@ -2,7 +2,7 @@ use azure_devops_rust_api::git;
 
 use crate::ado::api_key::get_api_key;
 
-use super::{get_repository_id::get_repository_id, repository::Repository};
+use super::{repository_id::get_repository_id, Repository};
 
 pub async fn get_pr_id<'a>(repository: &Repository<'a>, branch_name: &str) -> Option<i32> {
     let repo_id = get_repository_id(repository).await;

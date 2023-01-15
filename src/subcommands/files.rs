@@ -4,8 +4,8 @@ use clap::Args;
 
 use crate::{
     ado::organisation::{
-        organisation::Organisation,
         project::repository::parse_remote_url::{parse_remote_url, ParsedRemoteUrl},
+        Organisation,
     },
     utils::git::{find_git_directory, get_remote_url},
 };
@@ -39,7 +39,9 @@ pub fn run_files_command(options: Files) {
     let project = organisation.get_project(&project_name);
     let repository = project.get_repository(&repository_name, &working_dir);
 
-    let branch_name = options.branch.unwrap_or(repository.get_current_branch());
+    let branch_name = options
+        .branch
+        .unwrap_or_else(|| repository.get_current_branch());
 
     let files_url = repository.get_files_url_for_branch(&branch_name);
     files_url.open_in_browser();

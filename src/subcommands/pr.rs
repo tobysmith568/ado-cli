@@ -4,11 +4,11 @@ use clap::Args;
 
 use crate::{
     ado::organisation::{
-        organisation::Organisation,
         project::repository::{
             parse_remote_url::{parse_remote_url, ParsedRemoteUrl},
-            repository::Repository,
+            Repository,
         },
+        Organisation,
     },
     cli::prompt_yes_no::{prompt_yes_no, YesNoResult},
     utils::git::{find_git_directory, get_remote_url},
@@ -48,7 +48,9 @@ pub async fn run_pr_command(options: Pr) {
     let project = organisation.get_project(&project_name);
     let repository = project.get_repository(&repository_name, &working_dir);
 
-    let branch_name = options.branch.unwrap_or(repository.get_current_branch());
+    let branch_name = options
+        .branch
+        .unwrap_or_else(|| repository.get_current_branch());
 
     if options.create {
         return handle_creating_a_new_pr(&repository, &branch_name);
@@ -56,7 +58,7 @@ pub async fn run_pr_command(options: Pr) {
 
     let pr = repository.get_pull_request_for_branch(&branch_name).await;
 
-    if let None = pr {
+    if pr.is_none() {
         return handle_no_pr_exists(&repository, &branch_name);
     }
 

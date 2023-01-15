@@ -4,21 +4,21 @@ use azure_devops_rust_api::git;
 
 use crate::ado::api_key::get_api_key;
 
-use super::repository::Repository;
+use super::Repository;
 
 pub async fn get_repository_id<'a>(repository: &Repository<'a>) -> String {
-    let repository_id = get_repository_id_from_disk(&repository);
+    let repository_id = get_repository_id_from_disk(repository);
 
     if let Some(id) = repository_id {
         return id;
     }
 
-    let repository_id = get_repository_id_from_api(&repository).await;
-    save_repository_id_to_disk(&repository, &repository_id);
+    let repository_id = get_repository_id_from_api(repository).await;
+    save_repository_id_to_disk(repository, &repository_id);
     repository_id
 }
 
-fn get_repository_id_from_disk<'a>(repository: &Repository<'a>) -> Option<String> {
+fn get_repository_id_from_disk(repository: &Repository) -> Option<String> {
     let repo_id_file_name = get_repo_id_file_name(repository);
 
     let file_content = read_to_string(repo_id_file_name);
@@ -31,11 +31,7 @@ fn get_repository_id_from_disk<'a>(repository: &Repository<'a>) -> Option<String
 
 fn save_repository_id_to_disk<'a>(repository: &Repository<'a>, repository_id: &str) {
     let repo_id_file_name = get_repo_id_file_name(repository);
-    let write_result = write(repo_id_file_name, repository_id);
-
-    match write_result {
-        _ => (),
-    }
+    let _write_result = write(repo_id_file_name, repository_id);
 }
 
 async fn get_repository_id_from_api<'a>(repository: &Repository<'a>) -> String {
@@ -56,6 +52,6 @@ async fn get_repository_id_from_api<'a>(repository: &Repository<'a>) -> String {
     repo.id
 }
 
-fn get_repo_id_file_name<'a>(repository: &Repository<'a>) -> PathBuf {
+fn get_repo_id_file_name(repository: &Repository) -> PathBuf {
     repository.local_location.join("ado_repo_id")
 }

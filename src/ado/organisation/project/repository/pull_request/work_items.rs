@@ -1,8 +1,8 @@
 use azure_devops_rust_api::git;
 
-use crate::ado::{api_key::get_api_key, organisation::project::work_item::work_item::WorkItem};
+use crate::ado::{api_key::get_api_key, organisation::project::work_item::WorkItem};
 
-use super::pull_request::PullRequest;
+use super::PullRequest;
 
 pub async fn get_work_items<'a>(pull_request: &PullRequest<'a>) -> Vec<WorkItem<'a>> {
     let api_key = get_api_key();
@@ -23,6 +23,6 @@ pub async fn get_work_items<'a>(pull_request: &PullRequest<'a>) -> Vec<WorkItem<
 
     work_items
         .into_iter()
-        .map(|wi| WorkItem::new(&pull_request.repository.project, &wi.id.unwrap()))
+        .map(|wi| WorkItem::new(pull_request.repository.project, &wi.id.unwrap()))
         .collect::<Vec<WorkItem>>()
 }

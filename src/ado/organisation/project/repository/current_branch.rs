@@ -1,6 +1,6 @@
 use std::process::Command;
 
-use super::repository::Repository;
+use super::Repository;
 
 pub fn get_current_branch(repository: &Repository) -> String {
     let command_result = Command::new("git")
