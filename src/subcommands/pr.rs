@@ -23,6 +23,10 @@ pub struct Pr {
     /// The branch name to use. Defaults to the currently checked out branch
     #[arg(short, long)]
     branch: Option<String>,
+
+    /// Pass this flag if you want to create a new pull request
+    #[arg(short, long)]
+    create: bool,
 }
 
 pub async fn run_pr_command(options: Pr) {
@@ -46,6 +50,10 @@ pub async fn run_pr_command(options: Pr) {
 
     let branch_name = options.branch.unwrap_or(repository.get_current_branch());
 
+    if options.create {
+        return handle_creating_a_new_pr(&repository, &branch_name);
+    }
+
     let pr = repository.get_pull_request_for_branch(&branch_name).await;
 
     if let None = pr {
@@ -66,10 +74,12 @@ fn handle_no_pr_exists(repository: &Repository, branch_name: &str) {
 
     let should_create_new = prompt_yes_no(&question);
 
-    if let YesNoResult::No = should_create_new {
-        return ();
+    if let YesNoResult::Yes = should_create_new {
+        handle_creating_a_new_pr(repository, branch_name);
     }
+}
 
+fn handle_creating_a_new_pr(repository: &Repository, branch_name: &str) {
     let url = repository.get_create_pr_url_for_branch(branch_name);
     url.open_in_browser();
 }

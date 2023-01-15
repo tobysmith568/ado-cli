@@ -16,8 +16,8 @@ extern crate ini;
 
 #[derive(clap::Parser, Debug)]
 #[clap(
-    author = "Toby Smith",
-    version = "1.0.0",
+    author,
+    version,
     about = "Open Azure Devops board items, PRs, and repositories"
 )]
 #[command(propagate_version = true)]
@@ -28,13 +28,13 @@ struct Cli {
 
 #[derive(Subcommand, Debug)]
 enum Commands {
-    /// Opens a browser tab to the files browsers page for the current branch
+    /// Opens a browser tab to the file-browser page for the current branch
     Files(Files),
 
     /// Opens a browser tab to the open PR for the current branch, or lets you create one
     Pr(Pr),
 
-    /// Opens a browser tab to the PBI/Bug/Action/Etc. that's associated with the PR for the current branch
+    /// Opens a browser tab to the PBI/Bug/Action/etc. that's associated with the PR for the current branch
     Item(Item),
 }
 
