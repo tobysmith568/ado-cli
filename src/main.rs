@@ -30,7 +30,8 @@ enum Commands {
     /// Opens a browser tab to the open PR for the current branch, or lets you create one
     Pr(Pr),
 
-    /// Opens a browser tab to the PBI/Bug/Action/etc. that's associated with the PR for the current branch
+    /// [Aliases: pbi & bug] Opens a browser tab to the PBI/Bug/Action/etc. that's associated with the PR for the current branch
+    #[clap(aliases = ["pbi", "bug"])]
     Item(Item),
 }
 
