@@ -1,11 +1,11 @@
 use std::path::Path;
 
-use self::repository::Repository;
+use self::{repository::Repository, work_item::WorkItem};
 
 use super::Organisation;
 
 pub mod repository;
-mod work_item;
+pub mod work_item;
 
 pub struct Project<'a> {
     pub name: String,
@@ -22,5 +22,9 @@ impl<'a> Project<'a> {
 
     pub fn get_repository(&self, name: &str, local_location: &Path) -> Repository {
         Repository::new(self, name, local_location)
+    }
+
+    pub fn get_work_item(&self, id: String) -> WorkItem {
+        WorkItem::new(self, &id)
     }
 }

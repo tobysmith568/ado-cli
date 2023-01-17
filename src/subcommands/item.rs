@@ -19,6 +19,10 @@ pub struct Item {
     /// The branch name to use. Defaults to the currently checked out branch
     #[arg(short, long)]
     branch: Option<String>,
+
+    /// The ID to the PBI/Bug/etc. to use. Defaults to the those attached to the PR for the current branch
+    #[arg(long)]
+    id: Option<String>,
 }
 
 pub async fn run_item_command(options: Item) {
@@ -39,6 +43,13 @@ pub async fn run_item_command(options: Item) {
     let organisation = Organisation::new(&organisation_name);
     let project = organisation.get_project(&project_name);
     let repository = project.get_repository(&repository_name, &git_repository_root);
+
+    if let Some(id) = options.id {
+        let work_item = project.get_work_item(id);
+        let work_item_url = work_item.get_url();
+        work_item_url.open_in_browser();
+        return;
+    }
 
     let branch_name = options
         .branch
