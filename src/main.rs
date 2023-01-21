@@ -1,5 +1,7 @@
+use ado::api_key::get_api_key;
 use clap::{Parser, Subcommand};
 
+use config::config_file::ConfigFile;
 use subcommands::{
     files::{run_files_command, Files},
     item::{run_item_command, Item},
@@ -8,10 +10,10 @@ use subcommands::{
 
 mod ado;
 mod cli;
+mod config;
 mod subcommands;
 mod utils;
 
-#[macro_use]
 extern crate ini;
 
 #[derive(clap::Parser, Debug)]
@@ -39,9 +41,12 @@ enum Commands {
 async fn main() {
     let cli = Cli::parse();
 
+    let mut config_file = ConfigFile::load();
+    let api_key = get_api_key(&mut config_file);
+
     match cli.command {
-        Commands::Files(files) => run_files_command(files),
-        Commands::Pr(pr) => run_pr_command(pr).await,
-        Commands::Item(item) => run_item_command(item).await,
+        Commands::Files(files) => run_files_command(files, api_key),
+        Commands::Pr(pr) => run_pr_command(pr, api_key).await,
+        Commands::Item(item) => run_item_command(item, api_key).await,
     }
 }

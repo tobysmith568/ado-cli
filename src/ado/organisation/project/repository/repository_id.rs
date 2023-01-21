@@ -2,8 +2,6 @@ use std::{fs::read_to_string, fs::write, path::PathBuf};
 
 use azure_devops_rust_api::git;
 
-use crate::ado::api_key::get_api_key;
-
 use super::Repository;
 
 pub async fn get_repository_id<'a>(repository: &Repository<'a>) -> String {
@@ -35,13 +33,12 @@ fn save_repository_id_to_disk<'a>(repository: &Repository<'a>, repository_id: &s
 }
 
 async fn get_repository_id_from_api<'a>(repository: &Repository<'a>) -> String {
-    let api_key = get_api_key();
+    let credential = repository.project.organisation.create_credential();
+    let git_client = git::ClientBuilder::new(credential).build();
 
     let organisation_name = &repository.project.organisation.name;
     let project_name = &repository.project.name;
     let repository_name = &repository.name;
-
-    let git_client = git::ClientBuilder::new(api_key).build();
 
     let repo = git_client
         .repositories_client()

@@ -1,4 +1,6 @@
-use dialoguer::{console::Term, theme::ColorfulTheme, Select};
+use std::fmt::{Debug, Display, Formatter, Result};
+
+use super::prompt_enum::prompt_enum;
 
 #[derive(Debug)]
 pub enum YesNoResult {
@@ -6,27 +8,19 @@ pub enum YesNoResult {
     No,
 }
 
+impl Display for YesNoResult {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        Debug::fmt(&self, f)
+    }
+}
+
 pub fn prompt_yes_no(question: &str) -> YesNoResult {
-    println!("{}", question);
+    let options = vec![YesNoResult::Yes, YesNoResult::No];
 
-    let items = vec!["Yes", "No"];
-    let selection = Select::with_theme(&ColorfulTheme::default())
-        .items(&items)
-        .default(0)
-        .interact_on_opt(&Term::stderr())
-        .unwrap();
+    let index = prompt_enum(question, &options).unwrap_or(1);
 
-    let result = match selection {
-        Some(index) => {
-            if index == 0 {
-                YesNoResult::Yes
-            } else {
-                YesNoResult::No
-            }
-        }
-        None => YesNoResult::No,
-    };
-
-    println!("> {:?}", result);
-    result
+    match index {
+        0 => YesNoResult::Yes,
+        _ => YesNoResult::No,
+    }
 }

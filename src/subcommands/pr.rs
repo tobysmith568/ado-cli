@@ -29,7 +29,7 @@ pub struct Pr {
     create: bool,
 }
 
-pub async fn run_pr_command(options: Pr) {
+pub async fn run_pr_command(options: Pr, api_key: String) {
     let working_dir = options
         .directory
         .unwrap_or_else(|| env::current_dir().expect("Cannot access the current directory"));
@@ -44,7 +44,7 @@ pub async fn run_pr_command(options: Pr) {
         ..
     } = parse_remote_url(&remote_url);
 
-    let organisation = Organisation::new(&organisation_name);
+    let organisation = Organisation::new(&organisation_name, api_key);
     let project = organisation.get_project(&project_name);
     let repository = project.get_repository(&repository_name, &git_repository_root);
 
