@@ -7,6 +7,13 @@ on:
   pull_request:
     branches:
       - main
+  workflow_call:
+    inputs:
+      version:
+        description: The version to set in the cargo.toml
+        default: "0.0.0"
+        required: false
+        type: string
 
 env:
   CARGO_TERM_COLOR: always
@@ -50,6 +57,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+
+      - name: Set Version
+        if: inputs.version != ''
+        uses: thomaseizinger/set-crate-version@1.0.0
+        with:
+          version: ${{ inputs.version }}
 
       - name: Build
         run: cargo build --release --verbose
