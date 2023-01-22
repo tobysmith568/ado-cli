@@ -1,0 +1,112 @@
+name: CD
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: A SemVer for the release
+        default: ""
+        required: true
+        type: string
+
+defaults:
+  run:
+    shell: pwsh
+
+jobs:
+  ci:
+    name: Run CI
+    uses: ./.github/workflows/ci.yml
+    with:
+      version: ${{ inputs.version }}
+    secrets: inherit
+
+  create-release:
+    name: Create GitHub Release
+
+    needs:
+      - ci
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Create Assets Dir
+        run: New-Item -ItemType directory -Path ./assets
+
+      - name: Download Ubuntu Build
+        uses: actions/download-artifact@v3
+        with:
+          name: Ubuntu-Build
+          path: builds/ubuntu
+
+      - name: Zip Ubuntu Build
+        run: Compress-Archive -Path builds/ubuntu/** -DestinationPath ./assets/Ubuntu-Executable.zip
+
+      - name: Download MacOS Build
+        uses: actions/download-artifact@v3
+        with:
+          name: MacOS-Build
+          path: builds/macos
+
+      - name: Zip MacOS Build
+        run: Compress-Archive -Path builds/macos/** -DestinationPath ./assets/MacOS-Executable.zip
+
+      - name: Download Windows Build
+        uses: actions/download-artifact@v3
+        with:
+          name: Windows-Build
+          path: builds/windows
+
+      - name: Zip Windows Build
+        run: Compress-Archive -Path builds/windows/** -DestinationPath ./assets/Windows-Executable.zip
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ inputs.version }}
+          generate_release_notes: true
+          files: assets/**
+          body: |
+            # Release v${{ inputs.version }}
+
+            Download a binary directly from the attached files, or install from a package manager:
+            - [Chocolatey](https://community.chocolatey.org/packages/ado/${{ inputs.version }}): `choco install ado --version=${{ inputs.version }}`
+
+  choco:
+    name: Publish to Chocolatey
+
+    needs:
+      - create-release
+
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set .nuspec Fields
+        run: |
+          $content = [System.IO.File]::ReadAllText("./choco/ado/ado.nuspec")
+
+          $content = $content.Replace("GITHUB_ACTION_REPLACE_VERSION", "${{ inputs.version }}")
+          $content = $content.Replace("GITHUB_ACTION_REPLACE_YEAR", (Get-Date -format yyyy))
+
+          [System.IO.File]::WriteAllText("./choco/ado/ado.nuspec", $content)
+
+      - name: Download Windows Build
+        uses: actions/download-artifact@v3
+        with:
+          name: Windows-Build
+          path: choco/ado/tools
+
+      - name: Create the .nupkg
+        run: choco pack ./choco/ado/ado.nuspec
+
+      - name: Log in to Chocolatey
+        run: choco apikey --key ${{ secrets.choco_api_key }} --source https://push.chocolatey.org/
+
+      - name: Publish to Chocolatey
+        run: choco push --source https://push.chocolatey.org/

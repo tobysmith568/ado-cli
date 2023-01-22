@@ -1,0 +1,6 @@
+﻿
+From: https://github.com/tobysmith568/ado-cli/blob/main/LICENSE.md
+
+LICENSE
+
+Copyright ©️ Toby Smith 2023

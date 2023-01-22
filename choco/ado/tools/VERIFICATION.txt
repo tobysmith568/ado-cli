@@ -1,0 +1,9 @@
+﻿
+VERIFICATION
+Verification is intended to assist the Chocolatey moderators and community
+in verifying that this package's contents are trustworthy.
+
+I am the original software vendor.
+
+Me: https://github.com/tobysmith568
+Software: https://github.com/tobysmith568/ado-cli

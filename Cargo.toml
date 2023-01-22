@@ -7,8 +7,6 @@ authors = ["Toby Smith"]
 description = "Open browser tabs to Azure Devops board items, PRs, and repositories"
 repository = "https://github.com/tobysmith568/ado-cli"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
 azure_devops_rust_api = { version = "0.7.2", features = ["git"]}
 clap = { version = "4.1.1", features = ["derive"] }

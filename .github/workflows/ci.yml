@@ -56,7 +56,8 @@ jobs:
     runs-on: ${{ matrix.os.runsOn }}
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
 
       - name: Set Version
         if: inputs.version != ''
