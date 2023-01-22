@@ -4,8 +4,8 @@ use crate::cli::cli_error::CliError;
 
 use super::{repository_id::get_repository_id, Repository};
 
-pub async fn get_pr_id<'a>(
-    repository: &Repository<'a>,
+pub async fn get_pr_id(
+    repository: &Repository,
     branch_name: &str,
 ) -> Result<Option<i32>, CliError> {
     let credential = repository.project.organisation.create_credential();

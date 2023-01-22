@@ -1,33 +1,69 @@
 use std::path::{Path, PathBuf};
 
 use crate::{
+    ado::organisation::Organisation,
     cli::cli_error::CliError,
-    utils::{string::url_encode, url::Url},
+    utils::{
+        git::{find_git_repository_root, get_remote_url},
+        string::url_encode,
+        url::Url,
+    },
 };
 
-use self::{current_branch::get_current_branch, pr_id::get_pr_id, pull_request::PullRequest};
+use self::{
+    current_branch::get_current_branch,
+    parse_remote_url::{parse_remote_url, ParsedRemoteUrl},
+    pr_id::get_pr_id,
+    pull_request::PullRequest,
+};
 
 use super::Project;
 
 mod current_branch;
-pub mod parse_remote_url;
+mod parse_remote_url;
 mod pr_id;
 mod pull_request;
 mod repository_id;
 
-pub struct Repository<'a> {
+pub struct Repository {
     pub name: String,
     pub local_location: PathBuf,
-    pub project: &'a Project<'a>,
+    pub project: Project,
 }
 
-impl<'a> Repository<'a> {
-    pub fn new(project: &'a Project, name: &str, local_location: &Path) -> Repository<'a> {
+impl Repository {
+    pub fn new(project: Project, name: &str, local_location: &Path) -> Repository {
         Repository {
             name: name.to_string(),
             local_location: local_location.to_path_buf(),
             project,
         }
+    }
+
+    pub fn parse_from_directory(
+        directory: PathBuf,
+        api_key: String,
+    ) -> Result<Repository, CliError> {
+        let git_repository_root = find_git_repository_root(&directory)?;
+
+        let config_file_path = git_repository_root.join(".git").join("config");
+
+        let remote_url = get_remote_url(&config_file_path)?;
+
+        let parsed_remote_url = parse_remote_url(&remote_url)?;
+
+        let ParsedRemoteUrl {
+            organisation_name,
+            project_name,
+            repository_name,
+            ..
+        } = parsed_remote_url;
+
+        let organisation = Organisation::new(&organisation_name, api_key);
+        let project = organisation.get_project(&project_name);
+        let repository = project.get_repository(&repository_name, &git_repository_root);
+
+        Ok(repository)
     }
 
     pub fn get_current_branch(&self) -> String {

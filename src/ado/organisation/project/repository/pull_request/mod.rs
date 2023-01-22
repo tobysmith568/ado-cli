@@ -10,7 +10,7 @@ pub mod work_items;
 
 pub struct PullRequest<'a> {
     pub id: i32,
-    pub repository: &'a Repository<'a>,
+    pub repository: &'a Repository,
 }
 
 impl<'a> PullRequest<'a> {

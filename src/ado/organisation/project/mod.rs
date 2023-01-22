@@ -7,20 +7,20 @@ use super::Organisation;
 pub mod repository;
 pub mod work_item;
 
-pub struct Project<'a> {
+pub struct Project {
     pub name: String,
-    pub organisation: &'a Organisation,
+    pub organisation: Organisation,
 }
 
-impl<'a> Project<'a> {
-    pub fn new(name: &str, organisation: &'a Organisation) -> Project<'a> {
+impl Project {
+    pub fn new(name: &str, organisation: Organisation) -> Project {
         Project {
             name: name.to_string(),
             organisation,
         }
     }
 
-    pub fn get_repository(&self, name: &str, local_location: &Path) -> Repository {
+    pub fn get_repository(self, name: &str, local_location: &Path) -> Repository {
         Repository::new(self, name, local_location)
     }
 

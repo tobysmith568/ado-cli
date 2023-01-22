@@ -17,7 +17,7 @@ impl Organisation {
         }
     }
 
-    pub fn get_project(&self, name: &str) -> Project {
+    pub fn get_project(self, name: &str) -> Project {
         Project::new(name, self)
     }
 

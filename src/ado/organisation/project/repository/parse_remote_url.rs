@@ -41,7 +41,7 @@ fn parse_http_remote_url(remote_url: &str) -> Result<ParsedRemoteUrl, CliError> 
     })
 }
 
-pub fn parse_ssh_remote_url(remote_url: &str) -> Result<ParsedRemoteUrl, CliError> {
+fn parse_ssh_remote_url(remote_url: &str) -> Result<ParsedRemoteUrl, CliError> {
     lazy_static! {
         static ref SSH_URL_REGEX: Regex =
             Regex::new(r"^git@ssh.dev.azure.com:v\d/(.*?)/(.*?)/(.*?)$").unwrap();

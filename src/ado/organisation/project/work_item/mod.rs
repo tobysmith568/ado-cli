@@ -4,7 +4,7 @@ use super::Project;
 
 pub struct WorkItem<'a> {
     id: String,
-    project: &'a Project<'a>,
+    project: &'a Project,
 }
 
 impl<'a> WorkItem<'a> {

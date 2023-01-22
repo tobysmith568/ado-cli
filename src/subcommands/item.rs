@@ -3,12 +3,8 @@ use std::{env, path::PathBuf};
 use clap::Args;
 
 use crate::{
-    ado::organisation::{
-        project::repository::parse_remote_url::{parse_remote_url, ParsedRemoteUrl},
-        Organisation,
-    },
+    ado::organisation::project::repository::Repository,
     cli::{cli_error::CliError, cli_result::CliResult},
-    utils::git::{find_git_repository_root, get_remote_url},
 };
 
 #[derive(Args, Debug)]
@@ -31,33 +27,12 @@ pub async fn run_item_command(options: Item, api_key: String) -> CliResult {
         .directory
         .unwrap_or_else(|| env::current_dir().expect("Cannot access the current directory"));
 
-    let git_repository_root = match find_git_repository_root(&working_dir) {
-        Ok(root) => root,
+    let repository = match Repository::parse_from_directory(working_dir, api_key) {
+        Ok(repo) => repo,
         Err(err) => return err.into_result(),
     };
 
-    let config_file_path = git_repository_root.join(".git").join("config");
-
-    let remote_url = match get_remote_url(&config_file_path) {
-        Ok(url) => url,
-        Err(err) => return err.into_result(),
-    };
-
-    let parsed_remote_url = match parse_remote_url(&remote_url) {
-        Ok(url) => url,
-        Err(err) => return err.into_result(),
-    };
-
-    let ParsedRemoteUrl {
-        organisation_name,
-        project_name,
-        repository_name,
-        ..
-    } = parsed_remote_url;
-
-    let organisation = Organisation::new(&organisation_name, api_key);
-    let project = organisation.get_project(&project_name);
-    let repository = project.get_repository(&repository_name, &git_repository_root);
+    let project = &repository.project;
 
     if let Some(id) = options.id {
         let work_item = project.get_work_item(id);

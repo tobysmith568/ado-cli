@@ -6,7 +6,7 @@ use crate::cli::cli_error::CliError;
 
 use super::Repository;
 
-pub async fn get_repository_id<'a>(repository: &Repository<'a>) -> Result<String, CliError> {
+pub async fn get_repository_id(repository: &Repository) -> Result<String, CliError> {
     let repository_id = get_repository_id_from_disk(repository);
 
     if let Some(id) = repository_id {
@@ -30,12 +30,12 @@ fn get_repository_id_from_disk(repository: &Repository) -> Option<String> {
     }
 }
 
-fn save_repository_id_to_disk<'a>(repository: &Repository<'a>, repository_id: &str) {
+fn save_repository_id_to_disk(repository: &Repository, repository_id: &str) {
     let repo_id_file_name = get_repo_id_file_name(repository);
     let _write_result = write(repo_id_file_name, repository_id);
 }
 
-async fn get_repository_id_from_api<'a>(repository: &Repository<'a>) -> Result<String, CliError> {
+async fn get_repository_id_from_api(repository: &Repository) -> Result<String, CliError> {
     let credential = repository.project.organisation.create_credential();
     let git_client = git::ClientBuilder::new(credential).build();
 

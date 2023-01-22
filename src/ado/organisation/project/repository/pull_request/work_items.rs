@@ -34,6 +34,6 @@ pub async fn get_work_items<'a>(
 
     Ok(work_items
         .into_iter()
-        .map(|wi| WorkItem::new(pull_request.repository.project, &wi.id.unwrap()))
+        .map(|wi| WorkItem::new(&pull_request.repository.project, &wi.id.unwrap()))
         .collect::<Vec<WorkItem>>())
 }
