@@ -1,6 +1,9 @@
 use std::path::{Path, PathBuf};
 
-use crate::utils::{string::url_encode, url::Url};
+use crate::{
+    cli::cli_error::CliError,
+    utils::{string::url_encode, url::Url},
+};
 
 use self::{current_branch::get_current_branch, pr_id::get_pr_id, pull_request::PullRequest};
 
@@ -45,10 +48,13 @@ impl<'a> Repository<'a> {
         Url::from(url_text)
     }
 
-    pub async fn get_pull_request_for_branch(&self, branch_name: &str) -> Option<PullRequest> {
+    pub async fn get_pull_request_for_branch(
+        &self,
+        branch_name: &str,
+    ) -> Result<Option<PullRequest>, CliError> {
         let pr_id = get_pr_id(self, branch_name).await?;
 
-        Some(PullRequest::new(self, pr_id))
+        Ok(pr_id.map(|id| PullRequest::new(self, id)))
     }
 
     pub fn get_create_pr_url_for_branch(&self, branch_name: &str) -> Url {

@@ -1,6 +1,9 @@
+use std::process::ExitCode;
+
 use ado::api_key::get_api_key;
 use clap::{Parser, Subcommand};
 
+use cli::cli_result::CliResult;
 use config::config_file::ConfigFile;
 use subcommands::{
     files::{run_files_command, Files},
@@ -38,11 +41,29 @@ enum Commands {
 }
 
 #[tokio::main]
-async fn main() {
+async fn main() -> ExitCode {
+    let cli_result = implementation().await;
+
+    if let CliResult::Err(err) = cli_result {
+        println!("{}", err);
+        return ExitCode::from(1);
+    }
+
+    ExitCode::from(0)
+}
+
+async fn implementation() -> CliResult {
     let cli = Cli::parse();
 
-    let mut config_file = ConfigFile::load();
-    let api_key = get_api_key(&mut config_file);
+    let mut config_file = match ConfigFile::load() {
+        Ok(file) => file,
+        Err(err) => return err.into_result(),
+    };
+
+    let api_key = match get_api_key(&mut config_file) {
+        Ok(api_key) => api_key,
+        Err(err) => return err.into_result(),
+    };
 
     match cli.command {
         Commands::Files(files) => run_files_command(files, api_key),

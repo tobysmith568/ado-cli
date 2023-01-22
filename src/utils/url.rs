@@ -10,6 +10,6 @@ impl Url {
     }
 
     pub fn open_in_browser(&self) {
-        that(&self.path).unwrap();
+        _ = that(&self.path);
     }
 }

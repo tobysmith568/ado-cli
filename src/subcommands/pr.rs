@@ -10,7 +10,10 @@ use crate::{
         },
         Organisation,
     },
-    cli::prompt_yes_no::{prompt_yes_no, YesNoResult},
+    cli::{
+        cli_result::CliResult,
+        prompt_yes_no::{prompt_yes_no, YesNoResult},
+    },
     utils::git::{find_git_repository_root, get_remote_url},
 };
 
@@ -29,20 +32,34 @@ pub struct Pr {
     create: bool,
 }
 
-pub async fn run_pr_command(options: Pr, api_key: String) {
+pub async fn run_pr_command(options: Pr, api_key: String) -> CliResult {
     let working_dir = options
         .directory
         .unwrap_or_else(|| env::current_dir().expect("Cannot access the current directory"));
 
-    let git_repository_root = find_git_repository_root(&working_dir);
+    let git_repository_root = match find_git_repository_root(&working_dir) {
+        Ok(root) => root,
+        Err(err) => return err.into_result(),
+    };
+
     let config_file_path = git_repository_root.join(".git").join("config");
-    let remote_url = get_remote_url(&config_file_path);
+
+    let remote_url = match get_remote_url(&config_file_path) {
+        Ok(url) => url,
+        Err(err) => return err.into_result(),
+    };
+
+    let parsed_remote_url = match parse_remote_url(&remote_url) {
+        Ok(url) => url,
+        Err(err) => return err.into_result(),
+    };
+
     let ParsedRemoteUrl {
         organisation_name,
         project_name,
         repository_name,
         ..
-    } = parse_remote_url(&remote_url);
+    } = parsed_remote_url;
 
     let organisation = Organisation::new(&organisation_name, api_key);
     let project = organisation.get_project(&project_name);
@@ -53,19 +70,26 @@ pub async fn run_pr_command(options: Pr, api_key: String) {
         .unwrap_or_else(|| repository.get_current_branch());
 
     if options.create {
-        return handle_creating_a_new_pr(&repository, &branch_name);
+        handle_creating_a_new_pr(&repository, &branch_name);
+        return CliResult::Success;
     }
 
-    let pr = repository.get_pull_request_for_branch(&branch_name).await;
+    let pr_result = repository.get_pull_request_for_branch(&branch_name).await;
 
-    if pr.is_none() {
-        return handle_no_pr_exists(&repository, &branch_name);
-    }
+    let pr = match pr_result {
+        Err(err) => return err.into_result(),
+        Ok(Some(pr)) => pr,
+        Ok(None) => {
+            handle_no_pr_exists(&repository, &branch_name);
+            return CliResult::Success;
+        }
+    };
 
-    let pr = pr.unwrap();
     let pr_url = pr.get_url();
 
     pr_url.open_in_browser();
+
+    CliResult::Success
 }
 
 fn handle_no_pr_exists(repository: &Repository, branch_name: &str) {

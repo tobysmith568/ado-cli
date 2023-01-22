@@ -3,12 +3,14 @@ use std::{fs::File, path::PathBuf};
 use dirs::home_dir;
 use ini::Ini;
 
+use crate::cli::cli_error::CliError;
+
 pub struct ConfigFile {
     ini: Ini,
 }
 
 impl ConfigFile {
-    pub fn load() -> ConfigFile {
+    pub fn load() -> Result<ConfigFile, CliError> {
         let full_path = resolve_config_path();
 
         ensure_file_exists(&full_path);
@@ -16,12 +18,12 @@ impl ConfigFile {
         let load_result = Ini::load_from_file(&full_path);
 
         match load_result {
-            Ok(ini) => ConfigFile { ini },
-            Err(err) => panic!(
+            Ok(ini) => Ok(ConfigFile { ini }),
+            Err(err) => CliError::err(&format!(
                 "Cannot open config file {} because: {}",
                 full_path.display(),
                 err
-            ),
+            )),
         }
     }
 

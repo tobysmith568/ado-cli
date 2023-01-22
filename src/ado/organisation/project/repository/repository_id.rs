@@ -2,18 +2,21 @@ use std::{fs::read_to_string, fs::write, path::PathBuf};
 
 use azure_devops_rust_api::git;
 
+use crate::cli::cli_error::CliError;
+
 use super::Repository;
 
-pub async fn get_repository_id<'a>(repository: &Repository<'a>) -> String {
+pub async fn get_repository_id<'a>(repository: &Repository<'a>) -> Result<String, CliError> {
     let repository_id = get_repository_id_from_disk(repository);
 
     if let Some(id) = repository_id {
-        return id;
+        return Ok(id);
     }
 
-    let repository_id = get_repository_id_from_api(repository).await;
+    let repository_id = get_repository_id_from_api(repository).await?;
     save_repository_id_to_disk(repository, &repository_id);
-    repository_id
+
+    Ok(repository_id)
 }
 
 fn get_repository_id_from_disk(repository: &Repository) -> Option<String> {
@@ -32,7 +35,7 @@ fn save_repository_id_to_disk<'a>(repository: &Repository<'a>, repository_id: &s
     let _write_result = write(repo_id_file_name, repository_id);
 }
 
-async fn get_repository_id_from_api<'a>(repository: &Repository<'a>) -> String {
+async fn get_repository_id_from_api<'a>(repository: &Repository<'a>) -> Result<String, CliError> {
     let credential = repository.project.organisation.create_credential();
     let git_client = git::ClientBuilder::new(credential).build();
 
@@ -40,13 +43,18 @@ async fn get_repository_id_from_api<'a>(repository: &Repository<'a>) -> String {
     let project_name = &repository.project.name;
     let repository_name = &repository.name;
 
-    let repo = git_client
+    let repository_result = git_client
         .repositories_client()
         .get_repository(organisation_name, repository_name, project_name)
-        .await
-        .unwrap();
+        .await;
 
-    repo.id
+    match repository_result {
+        Ok(repo) => Ok(repo.id),
+        Err(_) => {
+            let message = "Invalid response from Azure Devops API.".to_string();
+            CliError::err(&message)
+        }
+    }
 }
 
 fn get_repo_id_file_name(repository: &Repository) -> PathBuf {

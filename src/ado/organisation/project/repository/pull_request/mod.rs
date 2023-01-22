@@ -1,4 +1,6 @@
-use crate::{ado::organisation::project::work_item::WorkItem, utils::url::Url};
+use crate::{
+    ado::organisation::project::work_item::WorkItem, cli::cli_error::CliError, utils::url::Url,
+};
 
 use self::work_items::get_work_items;
 
@@ -29,7 +31,7 @@ impl<'a> PullRequest<'a> {
         Url::from(url_text)
     }
 
-    pub async fn get_linked_work_items(&self) -> Vec<WorkItem> {
+    pub async fn get_linked_work_items(&self) -> Result<Vec<WorkItem>, CliError> {
         get_work_items(self).await
     }
 }
