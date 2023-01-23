@@ -40,11 +40,8 @@ impl Repository {
         }
     }
 
-    pub fn parse_from_directory(
-        directory: PathBuf,
-        api_key: String,
-    ) -> Result<Repository, CliError> {
-        let git_repository_root = find_git_repository_root(&directory)?;
+    pub fn parse_from_directory(directory: &Path, api_key: String) -> Result<Repository, CliError> {
+        let git_repository_root = find_git_repository_root(directory)?;
 
         let config_file_path = git_repository_root.join(".git").join("config");
 
@@ -84,6 +81,27 @@ impl Repository {
         Url::from(url_text)
     }
 
+    pub fn get_files_url_for_file_on_branch(
+        &self,
+        branch_name: &str,
+        file_or_directory: &str,
+        working_dir: &Path,
+    ) -> Url {
+        let project_name = &self.project.name;
+        let organisation_name = &self.project.organisation.name;
+        let repository_name = &self.name;
+
+        let url_encoded_branch = url_encode(branch_name);
+
+        let url_encoded_file_path = self.format_ado_file_path(file_or_directory, working_dir);
+
+        let url_text = format!(
+            "https://dev.azure.com/{organisation_name}/{project_name}/_git/{repository_name}?version=GB{url_encoded_branch}&path={url_encoded_file_path}"
+        );
+
+        Url::from(url_text)
+    }
+
     pub async fn get_pull_request_for_branch(
         &self,
         branch_name: &str,
@@ -105,5 +123,22 @@ impl Repository {
         );
 
         Url::from(url_text)
+    }
+
+    fn format_ado_file_path(&self, file_path: &str, working_dir: &Path) -> String {
+        let full_path = working_dir.join(file_path).canonicalize().unwrap();
+
+        let repository_root = &self.local_location;
+
+        let repository_root_segments = repository_root.components().count();
+
+        let result: String = full_path
+            .iter()
+            .skip(repository_root_segments)
+            .map(|seg| format!("/{}", seg.to_string_lossy()))
+            .collect();
+
+        dbg!(&result);
+        url_encode(&result)
     }
 }

@@ -30,6 +30,7 @@ struct Cli {
 #[derive(Subcommand, Debug)]
 enum Commands {
     /// Opens a browser tab to the file-browser page for the current branch
+    #[clap(aliases = ["file"])]
     Files(Files),
 
     /// Opens a browser tab to the open PR for the current branch, or lets you create one

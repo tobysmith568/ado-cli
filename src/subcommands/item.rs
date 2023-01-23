@@ -27,7 +27,7 @@ pub async fn run_item_command(options: Item, api_key: String) -> CliResult {
         .directory
         .unwrap_or_else(|| env::current_dir().expect("Cannot access the current directory"));
 
-    let repository = match Repository::parse_from_directory(working_dir, api_key) {
+    let repository = match Repository::parse_from_directory(&working_dir, api_key) {
         Ok(repo) => repo,
         Err(err) => return err.into_result(),
     };
