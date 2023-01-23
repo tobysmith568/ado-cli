@@ -13,6 +13,9 @@ pub struct Files {
     /// The branch name to use. Defaults to the currently checked out branch
     #[arg(short, long)]
     branch: Option<String>,
+
+    /// Optional path to a file or directory to show
+    file_path: Option<String>,
 }
 
 pub fn run_files_command(options: Files, api_key: String) -> CliResult {
@@ -20,7 +23,7 @@ pub fn run_files_command(options: Files, api_key: String) -> CliResult {
         .directory
         .unwrap_or_else(|| env::current_dir().expect("Cannot access the current directory"));
 
-    let repository = match Repository::parse_from_directory(working_dir, api_key) {
+    let repository = match Repository::parse_from_directory(&working_dir, api_key) {
         Ok(repo) => repo,
         Err(err) => return err.into_result(),
     };
@@ -29,8 +32,17 @@ pub fn run_files_command(options: Files, api_key: String) -> CliResult {
         .branch
         .unwrap_or_else(|| repository.get_current_branch());
 
-    let files_url = repository.get_files_url_for_branch(&branch_name);
-    files_url.open_in_browser();
+    if options.file_path.is_none() {
+        let files_url = repository.get_files_url_for_branch(&branch_name);
+        files_url.open_in_browser();
+        return CliResult::Success;
+    }
 
+    let file_path = options.file_path.unwrap();
+
+    let files_url =
+        repository.get_files_url_for_file_on_branch(&branch_name, &file_path, &working_dir);
+
+    files_url.open_in_browser();
     CliResult::Success
 }
