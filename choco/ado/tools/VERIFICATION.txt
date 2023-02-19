@@ -3,7 +3,13 @@ VERIFICATION
 Verification is intended to assist the Chocolatey moderators and community
 in verifying that this package's contents are trustworthy.
 
-I am the original software vendor.
+Binaries can be directly compared (checksum or direct binary comparison) against
+the originals by downloading the originals from the GitHub release for the
+corresponding version.
 
-Me: https://github.com/tobysmith568
-Software: https://github.com/tobysmith568/ado-cli
+The GitHub releases can be found at https://github.com/tobysmith568/ado-cli/releases
+and are named after the version of the software that they relate to with a "v" prefix.
+
+For example, to verify the binaries for version 0.1.0, go to
+https://github.com/tobysmith568/ado-cli/releases/tag/v0.1.0
+and compare the binary against the file in the `Windows-Executable.zip` archive.
