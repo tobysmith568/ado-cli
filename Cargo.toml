@@ -9,7 +9,7 @@ repository = "https://github.com/tobysmith568/ado-cli"
 
 [dependencies]
 azure_devops_rust_api = { version = "0.7.2", features = ["git"]}
-clap = { version = "4.1.1", features = ["derive"] }
+clap = { version = "4.3.0", features = ["derive"] }
 dialoguer = "0.10.3"
 dirs = "5.0.0"
 futures = "0.3.25"
