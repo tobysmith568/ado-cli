@@ -8,7 +8,7 @@ description = "Open browser tabs to Azure Devops board items, PRs, and repositor
 repository = "https://github.com/tobysmith568/ado-cli"
 
 [dependencies]
-azure_devops_rust_api = { version = "0.9.0", features = ["git"]}
+azure_devops_rust_api = { version = "0.10.0", features = ["git"]}
 clap = { version = "4.3.0", features = ["derive"] }
 dialoguer = "0.10.3"
 dirs = "5.0.0"
