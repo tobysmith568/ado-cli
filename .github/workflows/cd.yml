@@ -64,7 +64,7 @@ jobs:
         run: Compress-Archive -Path builds/windows/** -DestinationPath ./assets/Windows-Executable.zip
 
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ inputs.version }}
           generate_release_notes: true
