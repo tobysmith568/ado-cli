@@ -1,26 +1,26 @@
-import { existsSync, readFileSync } from 'node:fs';
-import path from 'node:path';
-import { CliError } from '../cli/cli-error';
+import { existsSync, readFileSync } from "node:fs";
+import path from "node:path";
+import { CliError } from "../cli/cli-error";
 
 export class GitService {
   public findRepositoryRoot(startDirectory: string): string {
     const resolved = path.resolve(startDirectory);
 
     for (const current of this.ancestorDirectories(resolved)) {
-      if (existsSync(path.join(current, '.git'))) {
+      if (existsSync(path.join(current, ".git"))) {
         return current;
       }
     }
 
-    throw new CliError('Not in a git repository');
+    throw new CliError("Not in a git repository");
   }
 
   public getRemoteUrl(repositoryRoot: string): string {
-    const gitConfigPath = path.join(repositoryRoot, '.git', 'config');
+    const gitConfigPath = path.join(repositoryRoot, ".git", "config");
 
     let config: string;
     try {
-      config = readFileSync(gitConfigPath, 'utf8');
+      config = readFileSync(gitConfigPath, "utf8");
     } catch (error) {
       throw new CliError(
         `Cannot open or find the config file at ${gitConfigPath}: ${String(error)}`,
@@ -30,9 +30,11 @@ export class GitService {
     const sections = config.split(/\r?\n\[/);
 
     for (const rawSection of sections) {
-      const section = rawSection.startsWith('[') ? rawSection : `[${rawSection}`;
+      const section = rawSection.startsWith("[")
+        ? rawSection
+        : `[${rawSection}`;
 
-      if (!section.startsWith('[remote')) {
+      if (!section.startsWith("[remote")) {
         continue;
       }
 
@@ -42,19 +44,19 @@ export class GitService {
       }
     }
 
-    throw new CliError('Cannot find remote url in the git config file');
+    throw new CliError("Cannot find remote url in the git config file");
   }
 
   public async getCurrentBranch(repositoryRoot: string): Promise<string> {
-    const processResult = Bun.spawnSync(['git', 'branch', '--show-current'], {
+    const processResult = Bun.spawnSync(["git", "branch", "--show-current"], {
       cwd: repositoryRoot,
-      stdout: 'pipe',
-      stderr: 'pipe',
+      stdout: "pipe",
+      stderr: "pipe",
     });
 
     if (processResult.exitCode !== 0) {
       const stderr = new TextDecoder().decode(processResult.stderr).trim();
-      throw new CliError(stderr || 'Failed to get current git branch');
+      throw new CliError(stderr || "Failed to get current git branch");
     }
 
     return new TextDecoder().decode(processResult.stdout).trim();

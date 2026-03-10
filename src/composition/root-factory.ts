@@ -1,15 +1,15 @@
-import { FilesCommand } from '../commands/files-command';
-import { ItemCommand } from '../commands/item-command';
-import { PrCommand } from '../commands/pr-command';
-import { ApiKeyManager } from '../services/api-key-manager';
-import { AzureDevOpsClient } from '../services/azure-devops-client';
-import { BrowserService } from '../services/browser-service';
-import { ConfigStore } from '../services/config-store';
-import { GitService } from '../services/git-service';
-import { RemoteUrlParser } from '../services/remote-url-parser';
-import { RepositoryIdCache } from '../services/repository-id-cache';
-import { RepositoryService } from '../services/repository-service';
-import { InkPrompts } from '../ui/ink-prompts';
+import { FilesCommand } from "../commands/files-command";
+import { ItemCommand } from "../commands/item-command";
+import { PrCommand } from "../commands/pr-command";
+import { ApiKeyManager } from "../services/api-key-manager";
+import { AzureDevOpsClient } from "../services/azure-devops-client";
+import { BrowserService } from "../services/browser-service";
+import { ConfigStore } from "../services/config-store";
+import { GitService } from "../services/git-service";
+import { RemoteUrlParser } from "../services/remote-url-parser";
+import { RepositoryIdCache } from "../services/repository-id-cache";
+import { RepositoryService } from "../services/repository-service";
+import { InkPrompts } from "../ui/ink-prompts";
 
 export type RootContainer = {
   filesCommand: FilesCommand;

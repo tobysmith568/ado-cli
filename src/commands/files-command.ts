@@ -1,5 +1,5 @@
-import type { BrowserService } from '../services/browser-service';
-import type { RepositoryService } from '../services/repository-service';
+import type { BrowserService } from "../services/browser-service";
+import type { RepositoryService } from "../services/repository-service";
 
 export type FilesCommandArgs = {
   directory?: string;
@@ -15,7 +15,8 @@ export class FilesCommand {
 
   public async execute(args: FilesCommandArgs): Promise<void> {
     const workingDirectory = args.directory ?? process.cwd();
-    const repository = this.repositoryService.parseFromDirectory(workingDirectory);
+    const repository =
+      this.repositoryService.parseFromDirectory(workingDirectory);
     const branchName = await this.repositoryService.resolveBranchName(
       repository.localPath,
       args.branch,

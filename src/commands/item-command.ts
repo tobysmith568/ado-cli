@@ -1,8 +1,8 @@
-import { CliError } from '../cli/cli-error';
-import type { AzureDevOpsClient } from '../services/azure-devops-client';
-import type { BrowserService } from '../services/browser-service';
-import type { RepositoryIdCache } from '../services/repository-id-cache';
-import type { RepositoryService } from '../services/repository-service';
+import { CliError } from "../cli/cli-error";
+import type { AzureDevOpsClient } from "../services/azure-devops-client";
+import type { BrowserService } from "../services/browser-service";
+import type { RepositoryIdCache } from "../services/repository-id-cache";
+import type { RepositoryService } from "../services/repository-service";
 
 export type ItemCommandArgs = {
   directory?: string;
@@ -20,10 +20,14 @@ export class ItemCommand {
 
   public async execute(args: ItemCommandArgs): Promise<void> {
     const workingDirectory = args.directory ?? process.cwd();
-    const repository = this.repositoryService.parseFromDirectory(workingDirectory);
+    const repository =
+      this.repositoryService.parseFromDirectory(workingDirectory);
 
     if (args.id) {
-      const workItemUrl = this.repositoryService.getWorkItemUrl(repository, args.id);
+      const workItemUrl = this.repositoryService.getWorkItemUrl(
+        repository,
+        args.id,
+      );
       await this.browserService.open(workItemUrl);
       return;
     }
@@ -33,12 +37,14 @@ export class ItemCommand {
       args.branch,
     );
 
-    const repositoryId = await this.repositoryIdCache.resolve(repository.localPath, async () =>
-      this.azureDevOpsClient.getRepositoryId(
-        repository.organisationName,
-        repository.projectName,
-        repository.repositoryName,
-      ),
+    const repositoryId = await this.repositoryIdCache.resolve(
+      repository.localPath,
+      async () =>
+        this.azureDevOpsClient.getRepositoryId(
+          repository.organisationName,
+          repository.projectName,
+          repository.repositoryName,
+        ),
     );
 
     const prId = await this.azureDevOpsClient.getOpenPrIdForBranch(
@@ -67,7 +73,10 @@ export class ItemCommand {
       return;
     }
 
-    const workItemUrl = this.repositoryService.getWorkItemUrl(repository, firstWorkItemId);
+    const workItemUrl = this.repositoryService.getWorkItemUrl(
+      repository,
+      firstWorkItemId,
+    );
     await this.browserService.open(workItemUrl);
   }
 }

@@ -1,8 +1,8 @@
-import type { AzureDevOpsClient } from '../services/azure-devops-client';
-import type { BrowserService } from '../services/browser-service';
-import type { RepositoryIdCache } from '../services/repository-id-cache';
-import type { RepositoryService } from '../services/repository-service';
-import type { InkPrompts } from '../ui/ink-prompts';
+import type { AzureDevOpsClient } from "../services/azure-devops-client";
+import type { BrowserService } from "../services/browser-service";
+import type { RepositoryIdCache } from "../services/repository-id-cache";
+import type { RepositoryService } from "../services/repository-service";
+import type { InkPrompts } from "../ui/ink-prompts";
 
 export type PrCommandArgs = {
   directory?: string;
@@ -21,24 +21,30 @@ export class PrCommand {
 
   public async execute(args: PrCommandArgs): Promise<void> {
     const workingDirectory = args.directory ?? process.cwd();
-    const repository = this.repositoryService.parseFromDirectory(workingDirectory);
+    const repository =
+      this.repositoryService.parseFromDirectory(workingDirectory);
     const branchName = await this.repositoryService.resolveBranchName(
       repository.localPath,
       args.branch,
     );
 
     if (args.create) {
-      const createUrl = this.repositoryService.getCreatePrUrlForBranch(repository, branchName);
+      const createUrl = this.repositoryService.getCreatePrUrlForBranch(
+        repository,
+        branchName,
+      );
       await this.browserService.open(createUrl);
       return;
     }
 
-    const repositoryId = await this.repositoryIdCache.resolve(repository.localPath, async () =>
-      this.azureDevOpsClient.getRepositoryId(
-        repository.organisationName,
-        repository.projectName,
-        repository.repositoryName,
-      ),
+    const repositoryId = await this.repositoryIdCache.resolve(
+      repository.localPath,
+      async () =>
+        this.azureDevOpsClient.getRepositoryId(
+          repository.organisationName,
+          repository.projectName,
+          repository.repositoryName,
+        ),
     );
 
     const prId = await this.azureDevOpsClient.getOpenPrIdForBranch(
@@ -54,7 +60,10 @@ export class PrCommand {
       );
 
       if (shouldCreate) {
-        const createUrl = this.repositoryService.getCreatePrUrlForBranch(repository, branchName);
+        const createUrl = this.repositoryService.getCreatePrUrlForBranch(
+          repository,
+          branchName,
+        );
         await this.browserService.open(createUrl);
       }
 

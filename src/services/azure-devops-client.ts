@@ -1,7 +1,7 @@
-import * as azdev from 'azure-devops-node-api';
-import type { IGitApi } from 'azure-devops-node-api/GitApi';
-import * as GitInterfaces from 'azure-devops-node-api/interfaces/GitInterfaces.js';
-import { CliError } from '../cli/cli-error';
+import * as azdev from "azure-devops-node-api";
+import type { IGitApi } from "azure-devops-node-api/GitApi";
+import * as GitInterfaces from "azure-devops-node-api/interfaces/GitInterfaces.js";
+import { CliError } from "../cli/cli-error";
 
 export class AzureDevOpsClient {
   public constructor(private readonly pat: string) {}
@@ -14,16 +14,21 @@ export class AzureDevOpsClient {
     try {
       const gitApi = await this.getGitApi(organisationName);
 
-      const repository = await gitApi.getRepository(repositoryName, projectName);
+      const repository = await gitApi.getRepository(
+        repositoryName,
+        projectName,
+      );
       const repositoryId = repository.id;
 
       if (!repositoryId) {
-        throw new CliError('Unable to resolve repository ID from Azure DevOps API.');
+        throw new CliError(
+          "Unable to resolve repository ID from Azure DevOps API.",
+        );
       }
 
       return repositoryId;
     } catch (error) {
-      throw this.mapApiError('resolve repository ID', error);
+      throw this.mapApiError("resolve repository ID", error);
     }
   }
 
@@ -42,10 +47,14 @@ export class AzureDevOpsClient {
         sourceRefName,
       };
 
-      const prs = await gitApi.getPullRequests(repositoryId, criteria, projectName);
+      const prs = await gitApi.getPullRequests(
+        repositoryId,
+        criteria,
+        projectName,
+      );
       return prs[0]?.pullRequestId ?? undefined;
     } catch (error) {
-      throw this.mapApiError('resolve pull request for branch', error);
+      throw this.mapApiError("resolve pull request for branch", error);
     }
   }
 
@@ -68,17 +77,20 @@ export class AzureDevOpsClient {
         .map((workItem: { id?: string }) => workItem.id)
         .filter((value: string | undefined): value is string => Boolean(value));
     } catch (error) {
-      throw this.mapApiError('resolve pull request work items', error);
+      throw this.mapApiError("resolve pull request work items", error);
     }
   }
 
   private async getGitApi(organisationName: string): Promise<IGitApi> {
     try {
       const authHandler = azdev.getPersonalAccessTokenHandler(this.pat);
-      const connection = new azdev.WebApi(`https://dev.azure.com/${organisationName}`, authHandler);
+      const connection = new azdev.WebApi(
+        `https://dev.azure.com/${organisationName}`,
+        authHandler,
+      );
       return await connection.getGitApi();
     } catch (error) {
-      throw this.mapApiError('create Azure DevOps Git API client', error);
+      throw this.mapApiError("create Azure DevOps Git API client", error);
     }
   }
 
@@ -101,7 +113,9 @@ export class AzureDevOpsClient {
       );
     }
 
-    return new CliError(`Invalid response from Azure Devops API while trying to ${operation}.`);
+    return new CliError(
+      `Invalid response from Azure Devops API while trying to ${operation}.`,
+    );
   }
 
   private isAuthError(message: string): boolean {
@@ -113,6 +127,8 @@ export class AzureDevOpsClient {
   }
 
   private toFullRef(branchName: string): string {
-    return branchName.startsWith('refs/heads/') ? branchName : `refs/heads/${branchName}`;
+    return branchName.startsWith("refs/heads/")
+      ? branchName
+      : `refs/heads/${branchName}`;
   }
 }

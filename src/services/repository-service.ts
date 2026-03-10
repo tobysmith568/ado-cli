@@ -1,8 +1,8 @@
-import path from 'node:path';
-import { CliError } from '../cli/cli-error';
-import type { RepositoryContext } from '../domain/repository-context';
-import type { GitService } from './git-service';
-import type { RemoteUrlParser } from './remote-url-parser';
+import path from "node:path";
+import { CliError } from "../cli/cli-error";
+import type { RepositoryContext } from "../domain/repository-context";
+import type { GitService } from "./git-service";
+import type { RemoteUrlParser } from "./remote-url-parser";
 
 function urlEncode(value: string): string {
   return encodeURIComponent(value);
@@ -25,7 +25,10 @@ export class RepositoryService {
     };
   }
 
-  public async resolveBranchName(repositoryRoot: string, branch?: string): Promise<string> {
+  public async resolveBranchName(
+    repositoryRoot: string,
+    branch?: string,
+  ): Promise<string> {
     if (branch) {
       return branch;
     }
@@ -33,7 +36,10 @@ export class RepositoryService {
     return this.gitService.getCurrentBranch(repositoryRoot);
   }
 
-  public getFilesUrlForBranch(context: RepositoryContext, branchName: string): string {
+  public getFilesUrlForBranch(
+    context: RepositoryContext,
+    branchName: string,
+  ): string {
     return `https://dev.azure.com/${context.organisationName}/${context.projectName}/_git/${context.repositoryName}?version=GB${urlEncode(branchName)}`;
   }
 
@@ -43,12 +49,19 @@ export class RepositoryService {
     fileOrDirectory: string,
     workingDirectory: string,
   ): string {
-    const filePath = this.formatAdoFilePath(context.localPath, fileOrDirectory, workingDirectory);
+    const filePath = this.formatAdoFilePath(
+      context.localPath,
+      fileOrDirectory,
+      workingDirectory,
+    );
 
     return `https://dev.azure.com/${context.organisationName}/${context.projectName}/_git/${context.repositoryName}?version=GB${urlEncode(branchName)}&path=${urlEncode(filePath)}`;
   }
 
-  public getCreatePrUrlForBranch(context: RepositoryContext, branchName: string): string {
+  public getCreatePrUrlForBranch(
+    context: RepositoryContext,
+    branchName: string,
+  ): string {
     return `https://dev.azure.com/${context.organisationName}/${context.projectName}/_git/${context.repositoryName}/pullrequestcreate?sourceRef=${urlEncode(branchName)}`;
   }
 
@@ -56,7 +69,10 @@ export class RepositoryService {
     return `https://dev.azure.com/${context.organisationName}/${context.projectName}/_git/${context.repositoryName}/pullrequest/${prId}`;
   }
 
-  public getWorkItemUrl(context: RepositoryContext, workItemId: string): string {
+  public getWorkItemUrl(
+    context: RepositoryContext,
+    workItemId: string,
+  ): string {
     return `https://dev.azure.com/${context.organisationName}/${context.projectName}/_workitems/edit/${workItemId}`;
   }
 
@@ -68,11 +84,11 @@ export class RepositoryService {
     const canonical = path.resolve(workingDirectory, filePath);
     const relative = path.relative(repositoryRoot, canonical);
 
-    if (!relative || relative.startsWith('..')) {
-      throw new CliError('File path must be inside the git repository root.');
+    if (!relative || relative.startsWith("..")) {
+      throw new CliError("File path must be inside the git repository root.");
     }
 
-    const normalized = `/${relative.split(path.sep).join('/')}`;
+    const normalized = `/${relative.split(path.sep).join("/")}`;
     return normalized;
   }
 }

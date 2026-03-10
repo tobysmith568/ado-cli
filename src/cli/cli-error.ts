@@ -1,6 +1,6 @@
 export class CliError extends Error {
   public constructor(message: string) {
     super(message);
-    this.name = 'CliError';
+    this.name = "CliError";
   }
 }
