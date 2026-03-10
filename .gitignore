@@ -111,3 +111,9 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/windows,linux,macos,visualstudiocode,rust
+
+# Bun / Node
+node_modules/
+dist/
+coverage/
+*.log

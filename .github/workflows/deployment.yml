@@ -1,0 +1,107 @@
+name: Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Release version (SemVer, e.g. 1.2.3)
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deployment-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  integration:
+    name: Run Integration
+    uses: ./.github/workflows/integration.yml
+    secrets: inherit
+
+  create-release:
+    name: Create GitHub Release
+    needs:
+      - integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download Ubuntu artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ado-ubuntu-latest
+          path: builds/ubuntu
+
+      - name: Download macOS artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ado-macos-latest
+          path: builds/macos
+
+      - name: Download Windows artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ado-windows-latest
+          path: builds/windows
+
+      - name: Create release assets
+        run: |
+          mkdir -p assets
+          cd builds/ubuntu && zip -r ../../assets/Ubuntu-Executable.zip .
+          cd ../macos && zip -r ../../assets/MacOS-Executable.zip .
+          cd ../windows && zip -r ../../assets/Windows-Executable.zip .
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ inputs.version }}
+          generate_release_notes: true
+          files: assets/*
+          body: |
+            # Release v${{ inputs.version }}
+
+            Download a binary directly from the attached files, or install from Chocolatey:
+            `choco install ado --version=${{ inputs.version }}`
+
+  choco:
+    name: Publish Chocolatey Package
+    needs:
+      - create-release
+    if: ${{ secrets.choco_api_key != '' }}
+    runs-on: windows-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set nuspec fields
+        shell: pwsh
+        run: |
+          $content = [System.IO.File]::ReadAllText('./choco/ado/ado.nuspec')
+          $content = $content.Replace('GITHUB_ACTION_REPLACE_VERSION', '${{ inputs.version }}')
+          $content = $content.Replace('GITHUB_ACTION_REPLACE_YEAR', (Get-Date -Format yyyy))
+          [System.IO.File]::WriteAllText('./choco/ado/ado.nuspec', $content)
+
+      - name: Download Windows artifact to choco tools
+        uses: actions/download-artifact@v4
+        with:
+          name: ado-windows-latest
+          path: choco/ado/tools
+
+      - name: Create nupkg
+        shell: pwsh
+        run: choco pack ./choco/ado/ado.nuspec
+
+      - name: Authenticate to Chocolatey
+        shell: pwsh
+        run: choco apikey --key ${{ secrets.choco_api_key }} --source https://push.chocolatey.org/
+
+      - name: Publish to Chocolatey
+        shell: pwsh
+        run: choco push --source https://push.chocolatey.org/

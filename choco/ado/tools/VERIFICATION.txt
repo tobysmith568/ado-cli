@@ -1,0 +1,12 @@
+VERIFICATION
+Verification is intended to assist Chocolatey moderators and users
+in verifying that this package's contents are trustworthy.
+
+Binaries can be directly compared (checksum or binary comparison) against
+release assets from this repository for the corresponding version.
+
+GitHub releases are at:
+https://github.com/tobysmith568/ado-cli/releases
+
+For version X.Y.Z, compare against the Windows binary from:
+https://github.com/tobysmith568/ado-cli/releases/tag/vX.Y.Z
