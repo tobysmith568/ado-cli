@@ -1,8 +1,27 @@
-import { describe, expect, it } from "bun:test";
+import { mock as bunMock, describe, expect, it } from "bun:test";
+import { createMock } from "mock-extended";
 import { CliError } from "../cli/cli-error";
 import { AzureDevOpsClient } from "./azure-devops-client";
 
+type GitApiForPrLookup = {
+  getPullRequests: (
+    repositoryId: string,
+    criteria: { sourceRefName?: string },
+    projectName: string,
+  ) => Promise<Array<{ pullRequestId?: number }>>;
+};
+
+type GitApiForRepository = {
+  getRepository: () => Promise<{ id?: string }>;
+};
+
+type GitApiForWorkItems = {
+  getPullRequestWorkItemRefs: () => Promise<Array<{ id?: string }>>;
+};
+
 describe("AzureDevOpsClient", () => {
+  const mock = createMock(() => bunMock());
+
   it("normalizes plain branch names to full refs for PR lookup", async () => {
     const client = new AzureDevOpsClient("pat") as unknown as {
       getOpenPrIdForBranch: AzureDevOpsClient["getOpenPrIdForBranch"];
@@ -17,12 +36,15 @@ describe("AzureDevOpsClient", () => {
 
     let capturedSourceRef = "";
 
-    client.getGitApi = async () => ({
-      getPullRequests: async (_repositoryId, criteria, _projectName) => {
+    const gitApi = mock<GitApiForPrLookup>();
+    gitApi.getPullRequests.mockImplementation(
+      async (_repositoryId, criteria) => {
         capturedSourceRef = criteria.sourceRefName ?? "";
         return [{ pullRequestId: 7 }];
       },
-    });
+    );
+
+    client.getGitApi = async () => gitApi;
 
     const prId = await client.getOpenPrIdForBranch(
       "org",
@@ -43,11 +65,10 @@ describe("AzureDevOpsClient", () => {
       }>;
     };
 
-    client.getGitApi = async () => ({
-      getRepository: async () => {
-        throw new Error("401 Unauthorized");
-      },
-    });
+    const gitApi = mock<GitApiForRepository>();
+    gitApi.getRepository.mockRejectedValue(new Error("401 Unauthorized"));
+
+    client.getGitApi = async () => gitApi;
 
     await expect(
       client.getRepositoryId("org", "project", "repo"),
@@ -65,11 +86,12 @@ describe("AzureDevOpsClient", () => {
       }>;
     };
 
-    client.getGitApi = async () => ({
-      getPullRequestWorkItemRefs: async () => {
-        throw new Error("404 Not Found");
-      },
-    });
+    const gitApi = mock<GitApiForWorkItems>();
+    gitApi.getPullRequestWorkItemRefs.mockRejectedValue(
+      new Error("404 Not Found"),
+    );
+
+    client.getGitApi = async () => gitApi;
 
     await expect(
       client.getPullRequestWorkItemIds("org", "project", "repo", 1),

@@ -1,13 +1,17 @@
-import { describe, expect, it } from "bun:test";
+import { mock as bunMock, describe, expect, it } from "bun:test";
+import { createMock } from "mock-extended";
 import { CliError } from "../cli/cli-error";
 import type { GitService } from "./git-service";
 import type { RemoteUrlParser } from "./remote-url-parser";
 import { RepositoryService } from "./repository-service";
 
 describe("RepositoryService", () => {
+  const mock = createMock(() => bunMock());
+  const gitService = mock<GitService>();
+  const remoteUrlParser = mock<RemoteUrlParser>();
   const service = new RepositoryService(
-    {} as GitService,
-    {} as RemoteUrlParser,
+    gitService as unknown as GitService,
+    remoteUrlParser as unknown as RemoteUrlParser,
   );
   const context = {
     organisationName: "org",
@@ -15,6 +19,27 @@ describe("RepositoryService", () => {
     repositoryName: "repo",
     localPath: "/repo",
   };
+
+  it("parses repository context from directory using injected dependencies", () => {
+    gitService.findRepositoryRoot.mockReturnValue("/repo");
+    gitService.getRemoteUrl.mockReturnValue(
+      "https://user@dev.azure.com/org/project/_git/repo",
+    );
+    remoteUrlParser.parse.mockReturnValue({
+      organisationName: "org",
+      projectName: "project",
+      repositoryName: "repo",
+    });
+
+    const parsed = service.parseFromDirectory("/repo/src");
+
+    expect(gitService.findRepositoryRoot).toHaveBeenCalledWith("/repo/src");
+    expect(gitService.getRemoteUrl).toHaveBeenCalledWith("/repo");
+    expect(remoteUrlParser.parse).toHaveBeenCalledWith(
+      "https://user@dev.azure.com/org/project/_git/repo",
+    );
+    expect(parsed).toEqual(context);
+  });
 
   it("builds file URL with encoded branch and path", () => {
     const url = service.getFilesUrlForFileOnBranch(
