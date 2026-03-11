@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <!-- == PACKAGE SPECIFIC SECTION == -->
+    <id>ado</id>
+    <version>GITHUB_ACTION_REPLACE_VERSION</version>
+    <packageSourceUrl>https://github.com/tobysmith568/ado-cli</packageSourceUrl>
+    <owners>Toby Smith</owners>
+
+    <!-- == SOFTWARE SPECIFIC SECTION == -->
+    <title>ADO CLI</title>
+    <authors>Toby Smith</authors>
+    <projectUrl>https://github.com/tobysmith568/ado-cli</projectUrl>
+    <!--<iconUrl>http://rawcdn.githack.com/__REPLACE_YOUR_REPO__/master/icons/ado.png</iconUrl>-->
+    <copyright>Toby Smith ©️ GITHUB_ACTION_REPLACE_YEAR</copyright>
+    <licenseUrl>https://github.com/tobysmith568/ado-cli/blob/main/LICENSE.md</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <projectSourceUrl>https://github.com/tobysmith568/ado-cli</projectSourceUrl>
+    <docsUrl>https://github.com/tobysmith568/ado-cli/blob/main/README.md</docsUrl>
+    <!--<mailingListUrl></mailingListUrl>-->
+    <bugTrackerUrl>https://github.com/tobysmith568/ado-cli/issues</bugTrackerUrl>
+    <tags>ado azdo AzureDevops Azure Devops PR</tags>
+    <summary>A CLI for opening browser tabs to different pages on the Azure Devops website relating
+      to the repository at the current working directory.</summary>
+    <description>A CLI for opening browser tabs to different pages on the Azure Devops website
+      relating to the repository at the current working directory.</description>
+    <!-- <releaseNotes>__REPLACE_OR_REMOVE__MarkDown_Okay</releaseNotes> -->
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>

@@ -1,40 +1,82 @@
-# ADO
+# ADO CLI (V2)
 
-A CLI for opening browser tabs to different pages on the Azure Devops website relating to the repository at the current working directory.
+A CLI for opening browser tabs to Azure DevOps pages related to the repository in your current working directory.
 
-## Common Commands
+## Install / Build
+
+Requirements:
+- Bun 1.3+
+- Git
+
+Local dev:
+
+```bash
+bun install
+bun run lint
+bun run typecheck
+bun test
+```
+
+Build executable:
+
+```bash
+bun run build
+```
+
+This outputs a compiled binary at `dist/ado` (or `dist/ado.exe` on Windows).
+
+## Commands
+
+### `ado files [file_path]`
+Open the Azure DevOps file explorer for the current branch.
+
+Examples:
 
 ```bash
 ado files
+ado files ./src/services/repository-service.ts
 ```
 
-Opens the file explorer web page for the repository at the current working directory.
+Options:
+- `-b, --branch <branch>`: override branch
+- `-d, --directory <directory>`: run command as if from another directory
 
-Also accepts a specific file path from the current directory: `ado files ./some/file.txt`
+Alias:
+- `ado file`
 
-- Accepts the `--branch` option to override the source branch.
-- Accepts the `--directory` option to override where the command is run from.
+### `ado pr`
+Open the currently active pull request for the branch. If no active PR exists, prompts to open the create-PR page.
 
-<hr />
+Options:
+- `-b, --branch <branch>`: override branch
+- `-d, --directory <directory>`: run command as if from another directory
+- `-c, --create`: always open the create-PR page
 
-```bash
-ado pr
-```
+### `ado item`
+Open the first work item linked to the active PR for the branch.
 
-Opens the web page for the currently open pull request for the current branch in the repository at the current working directory.  
-It will prompt if you'd like to open a pull request if one is not currently open.
+Options:
+- `-b, --branch <branch>`: override branch
+- `-d, --directory <directory>`: run command as if from another directory
+- `--id <id>`: open work item directly (skip PR lookup)
 
-- Accepts the `--branch` option to override the source branch.
-- Accepts the `--directory` option to override where the command is run from.
-- Accepts the `--create` flag to aways create a new pull request.
+Aliases:
+- `ado pbi`
+- `ado bug`
 
-<hr />
+## Auth Configuration
 
-```bash
-ado item
-```
+Credentials are stored in `~/.ado_cli` (parity with V1).
 
-Opens the PBI, Bug, Action etc. that is linked to the pull request currently open for the branch in the repository at the current working directory.
+Supported modes:
+- store PAT directly in config
+- store an environment variable name in config (reads PAT value from env var)
 
-- Accepts the `--branch` option to override the source branch.
-- Accepts the `--directory` option to override where the command is run from.
+On first authenticated command, the CLI prompts you to select a mode.
+
+## CI / Release
+
+Workflows:
+- `.github/workflows/integration.yml`: lint, typecheck, test, and multi-OS build artifacts
+- `.github/workflows/deployment.yml`: manual versioned release + optional Chocolatey publish
+- `.github/workflows/codeql.yml`: static analysis scanning
