@@ -32,19 +32,19 @@ jobs:
 
     steps:
       - name: Download Ubuntu artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: ado-ubuntu-latest
           path: builds/ubuntu
 
       - name: Download macOS artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: ado-macos-latest
           path: builds/macos
 
       - name: Download Windows artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: ado-windows-latest
           path: builds/windows
@@ -89,7 +89,7 @@ jobs:
           [System.IO.File]::WriteAllText('./choco/ado/ado.nuspec', $content)
 
       - name: Download Windows artifact to choco tools
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: ado-windows-latest
           path: choco/ado/tools
