@@ -57,7 +57,7 @@ jobs:
           cd ../windows && zip -r ../../assets/Windows-Executable.zip .
 
       - name: Create GitHub release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: v${{ inputs.version }}
           generate_release_notes: true
